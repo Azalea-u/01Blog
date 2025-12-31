@@ -1,0 +1,59 @@
+# --------------------------
+# Maven / Java
+# --------------------------
+/target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Maven wrapper
+/.mvn/wrapper/maven-wrapper.jar
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+out/
+
+# NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+*.nb-gradle
+
+# VS Code
+.vscode/
+
+# --------------------------
+# Logs
+# --------------------------
+*.log
+logs/
+*.log.*
+
+# --------------------------
+# OS files
+# --------------------------
+.DS_Store
+Thumbs.db
+
+# --------------------------
+# Environment / secrets
+# --------------------------
+*.env
+.env.*
+*.properties
+!src/main/resources/application.properties
+
+# --------------------------
+# Others
+# --------------------------
+*.tmp
+*.swp
