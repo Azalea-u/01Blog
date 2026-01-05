@@ -1,59 +1,63 @@
-# --------------------------
-# Maven / Java
-# --------------------------
-/target/
-*.class
-*.jar
-*.war
-*.ear
+# ==========================
+# OS / Editor
+# ==========================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.tmp
 
-# Maven wrapper
-/.mvn/wrapper/maven-wrapper.jar
-
-# Eclipse
+# ==========================
+# IDEs
+# ==========================
+.idea/
+*.iml
+.vscode/
 .project
 .classpath
 .settings/
-
-# IntelliJ IDEA
-.idea/
-*.iml
 out/
 
-# NetBeans
-nbproject/private/
-build/
-nbbuild/
-dist/
-nbdist/
-*.nb-gradle
+# ==========================
+# Java / Maven (Backend)
+# ==========================
+backend/target/
+backend/*.log
+backend/**/*.class
+backend/**/*.jar
+backend/**/*.war
 
-# VS Code
-.vscode/
+# Maven wrapper binary
+backend/.mvn/wrapper/maven-wrapper.jar
 
-# --------------------------
-# Logs
-# --------------------------
-*.log
-logs/
-*.log.*
+# ==========================
+# Spring Boot
+# ==========================
+backend/logs/
+backend/*.log.*
 
-# --------------------------
-# OS files
-# --------------------------
-.DS_Store
-Thumbs.db
+# Allow main config, ignore secrets
+backend/src/main/resources/*.properties
+!backend/src/main/resources/application.properties
 
-# --------------------------
-# Environment / secrets
-# --------------------------
+# ==========================
+# Frontend (future-proof)
+# ==========================
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.env
+frontend/.env.*
+
+# ==========================
+# Environment / Secrets
+# ==========================
 *.env
+.env
 .env.*
-*.properties
-!src/main/resources/application.properties
 
-# --------------------------
-# Others
-# --------------------------
-*.tmp
-*.swp
+# ==========================
+# Misc
+# ==========================
+*.pid
+coverage/
