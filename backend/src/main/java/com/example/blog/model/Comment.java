@@ -1,7 +1,7 @@
 package com.example.blog.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "comments")
@@ -21,7 +21,7 @@ public class Comment {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private OffsetDateTime createdAt = OffsetDateTime.now();
 
     // Getters and setters
     public Long getId() { return id; }
@@ -36,6 +36,6 @@ public class Comment {
     public String getContent() { return content; }
     public void setContent(String content) { this.content = content; }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public OffsetDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
 }

@@ -1,11 +1,23 @@
 package com.example.blog.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "reports")
+@Table(
+    name = "reports",
+    indexes = {
+        @Index(columnList = "reportedUser"),
+        @Index(columnList = "status")
+    }
+)
 public class Report {
+
+    public enum ReportStatus {
+        PENDING,
+        RESOLVED,
+        REJECTED
+    }
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,10 +34,11 @@ public class Report {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String reason;
 
+    @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    private String status = "PENDING";
+    private ReportStatus status = ReportStatus.PENDING;
 
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private OffsetDateTime createdAt = OffsetDateTime.now();
 
     // Getters and setters
     public Long getId() { return id; }
@@ -43,9 +56,9 @@ public class Report {
     public String getReason() { return reason; }
     public void setReason(String reason) { this.reason = reason; }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public ReportStatus getStatus() { return status; }
+    public void setStatus(ReportStatus status) { this.status = status; }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public OffsetDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
 }

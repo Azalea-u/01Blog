@@ -8,8 +8,7 @@ import java.util.List;
 @Table(name = "users")
 public class User {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, unique = true, length = 50)
@@ -31,13 +30,41 @@ public class User {
     private Boolean isBanned = false;
 
     // Relations
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+
+    // Posts authored by this user
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    // Comments authored by this user
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments;
 
+    // Likes by this user
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Like> likes;
+
+    // Notifications for this user
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notification> notifications;
+
+    // Subscriptions where this user is the subscriber
+    @OneToMany(mappedBy = "subscriber", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Subscription> subscriptions;
+
+    // Subscriptions where this user is the target
+    @OneToMany(mappedBy = "target", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Subscription> subscribers;
+
+    // Reports made by this user
+    @OneToMany(mappedBy = "reporter", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Report> reportsMade;
+
+    // Reports against this user
+    @OneToMany(mappedBy = "reportedUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Report> reportsReceived;
+
     // Getters and setters
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -64,4 +91,22 @@ public class User {
 
     public List<Comment> getComments() { return comments; }
     public void setComments(List<Comment> comments) { this.comments = comments; }
+
+    public List<Like> getLikes() { return likes; }
+    public void setLikes(List<Like> likes) { this.likes = likes; }
+
+    public List<Notification> getNotifications() { return notifications; }
+    public void setNotifications(List<Notification> notifications) { this.notifications = notifications; }
+
+    public List<Subscription> getSubscriptions() { return subscriptions; }
+    public void setSubscriptions(List<Subscription> subscriptions) { this.subscriptions = subscriptions; }
+
+    public List<Subscription> getSubscribers() { return subscribers; }
+    public void setSubscribers(List<Subscription> subscribers) { this.subscribers = subscribers; }
+
+    public List<Report> getReportsMade() { return reportsMade; }
+    public void setReportsMade(List<Report> reportsMade) { this.reportsMade = reportsMade; }
+
+    public List<Report> getReportsReceived() { return reportsReceived; }
+    public void setReportsReceived(List<Report> reportsReceived) { this.reportsReceived = reportsReceived; }
 }
