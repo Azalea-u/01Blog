@@ -47,11 +47,14 @@ success "Containers are up and running!"
 separator
 
 # ------------------------------
-# Wait a few seconds for DB
+# Wait for DB to be ready
 # ------------------------------
-info "Waiting 5 seconds for DB initialization..."
-sleep 5
-success "Database should be ready."
+info "Waiting for PostgreSQL to accept connections..."
+until docker exec blog_db pg_isready -U bloguser > /dev/null 2>&1; do
+    echo -n "."
+    sleep 2
+done
+success "PostgreSQL is ready!"
 separator
 
 # ------------------------------

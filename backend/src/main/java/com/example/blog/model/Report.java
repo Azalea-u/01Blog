@@ -7,7 +7,7 @@ import java.time.OffsetDateTime;
 @Table(
     name = "reports",
     indexes = {
-        @Index(columnList = "reportedUser"),
+        @Index(columnList = "reported_user_id"),
         @Index(columnList = "status")
     }
 )
