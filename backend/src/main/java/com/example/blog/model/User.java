@@ -2,13 +2,21 @@ package com.example.blog.model;
 
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "users")
+@Table(
+    name = "users",
+    indexes = {
+        @Index(columnList = "username"),
+        @Index(columnList = "email")
+    }
+)
 public class User {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, unique = true, length = 50)
@@ -21,47 +29,71 @@ public class User {
     private String passwordHash;
 
     @Column(nullable = false, length = 20)
-    private String role = "USER"; // Default role
+    private String role = "USER";
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt = OffsetDateTime.now();
 
     @Column(name = "is_banned", nullable = false)
-    private Boolean isBanned = false;
+    private boolean banned = false;
 
-    // Relations
+    /* ---------- relations ---------- */
 
-    // Posts authored by this user
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Post> posts;
+    @OneToMany(
+        mappedBy = "user",
+        cascade = CascadeType.REMOVE,
+        orphanRemoval = true
+    )
+    private List<Post> posts = new ArrayList<>();
 
-    // Comments authored by this user
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> comments;
+    @OneToMany(
+        mappedBy = "user",
+        cascade = CascadeType.REMOVE,
+        orphanRemoval = true
+    )
+    private List<Comment> comments = new ArrayList<>();
 
-    // Likes by this user
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Like> likes;
+    @OneToMany(
+        mappedBy = "user",
+        cascade = CascadeType.REMOVE,
+        orphanRemoval = true
+    )
+    private List<Like> likes = new ArrayList<>();
 
-    // Notifications for this user
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Notification> notifications;
+    @OneToMany(
+        mappedBy = "user",
+        cascade = CascadeType.REMOVE,
+        orphanRemoval = true
+    )
+    private List<Notification> notifications = new ArrayList<>();
 
-    // Subscriptions where this user is the subscriber
-    @OneToMany(mappedBy = "subscriber", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Subscription> subscriptions;
+    @OneToMany(
+        mappedBy = "subscriber",
+        cascade = CascadeType.REMOVE,
+        orphanRemoval = true
+    )
+    private List<Subscription> subscriptions = new ArrayList<>();
 
-    // Subscriptions where this user is the target
-    @OneToMany(mappedBy = "target", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Subscription> subscribers;
+    @OneToMany(
+        mappedBy = "target",
+        cascade = CascadeType.REMOVE,
+        orphanRemoval = true
+    )
+    private List<Subscription> subscribers = new ArrayList<>();
 
-    // Reports made by this user
-    @OneToMany(mappedBy = "reporter", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Report> reportsMade;
+    @OneToMany(
+        mappedBy = "reporter",
+        cascade = CascadeType.REMOVE,
+        orphanRemoval = true
+    )
+    private List<Report> reportsMade = new ArrayList<>();
 
-    // Reports against this user
-    @OneToMany(mappedBy = "reportedUser", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Report> reportsReceived;
+    @OneToMany(
+        mappedBy = "reportedUser",
+        cascade = CascadeType.REMOVE,
+        orphanRemoval = true
+    )
+    private List<Report> reportsReceived = new ArrayList<>();
 
     // Getters and setters
 
@@ -83,8 +115,8 @@ public class User {
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
 
-    public Boolean getIsBanned() { return isBanned; }
-    public void setIsBanned(Boolean isBanned) { this.isBanned = isBanned; }
+    public boolean getIsBanned() { return banned; }
+    public void setBanned(boolean banned) { this.banned = banned; }
 
     public List<Post> getPosts() { return posts; }
     public void setPosts(List<Post> posts) { this.posts = posts; }

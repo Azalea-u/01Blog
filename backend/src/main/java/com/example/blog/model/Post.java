@@ -2,6 +2,7 @@ package com.example.blog.model;
 
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -9,7 +10,7 @@ import java.util.List;
     name = "posts",
     indexes = {
         @Index(columnList = "user_id"),
-        @Index(columnList = "createdAt")
+        @Index(columnList = "created_at")
     }
 )
 public class Post {
@@ -18,32 +19,51 @@ public class Post {
         IMAGE, VIDEO
     }
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(
+        name = "user_id",
+        nullable = false,
+        foreignKey = @ForeignKey(name = "fk_post_user")
+    )
     private User user;
 
-    @Column(length = 200)
+    @Column(nullable = false, length = 200)
     private String title;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    @Column(length = 500)
     private String mediaUrl;
 
     @Enumerated(EnumType.STRING)
     private MediaType mediaType;
 
+    @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt = OffsetDateTime.now();
+
+    @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt = OffsetDateTime.now();
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> comments;
+    @OneToMany(
+        mappedBy = "post",
+        cascade = CascadeType.REMOVE,
+        orphanRemoval = true
+    )
+    private List<Comment> comments = new ArrayList<>();
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Like> likes;
+    @OneToMany(
+        mappedBy = "post",
+        cascade = CascadeType.REMOVE,
+        orphanRemoval = true
+    )
+    private List<Like> likes = new ArrayList<>();
+
+    /* getters & setters unchanged */
 
     // Getters and setters
     public Long getId() { return id; }

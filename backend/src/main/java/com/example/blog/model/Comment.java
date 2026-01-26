@@ -4,23 +4,40 @@ import jakarta.persistence.*;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "comments")
+@Table(
+    name = "comments",
+    indexes = {
+        @Index(columnList = "post_id"),
+        @Index(columnList = "user_id"),
+        @Index(columnList = "created_at")
+    }
+)
 public class Comment {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "post_id", nullable = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(
+        name = "post_id",
+        nullable = false,
+        foreignKey = @ForeignKey(name = "fk_comment_post")
+    )
     private Post post;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(
+        name = "user_id",
+        nullable = false,
+        foreignKey = @ForeignKey(name = "fk_comment_user")
+    )
     private User user;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt = OffsetDateTime.now();
 
     // Getters and setters

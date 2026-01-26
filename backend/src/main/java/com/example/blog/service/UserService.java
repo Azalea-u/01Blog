@@ -50,7 +50,7 @@ public class UserService {
                 user.setPasswordHash(passwordEncoder.encode(updatedUser.getPasswordHash()));
             }
             user.setRole(updatedUser.getRole());
-            user.setIsBanned(updatedUser.getIsBanned());
+            user.setBanned(updatedUser.getIsBanned());
             return userRepository.save(user);
         }).orElseThrow(() -> new ResourceNotFoundException("User with ID " + id + " not found"));
     }

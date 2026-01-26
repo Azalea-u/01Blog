@@ -8,7 +8,9 @@ import java.time.OffsetDateTime;
     name = "reports",
     indexes = {
         @Index(columnList = "reported_user_id"),
-        @Index(columnList = "status")
+        @Index(columnList = "reported_post_id"),
+        @Index(columnList = "status"),
+        @Index(columnList = "created_at")
     }
 )
 public class Report {
@@ -19,28 +21,44 @@ public class Report {
         REJECTED
     }
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
+    @JoinColumn(
+        name = "reporter_id",
+        nullable = false,
+        foreignKey = @ForeignKey(name = "fk_report_reporter")
+    )
     private User reporter;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
+    @JoinColumn(
+        name = "reported_user_id",
+        nullable = false,
+        foreignKey = @ForeignKey(name = "fk_report_reported_user")
+    )
     private User reportedUser;
 
     @ManyToOne
+    @JoinColumn(
+        name = "reported_post_id",
+        foreignKey = @ForeignKey(name = "fk_report_reported_post")
+    )
     private Post reportedPost;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String reason;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 20)
+    @Column(nullable = false, length = 20)
     private ReportStatus status = ReportStatus.PENDING;
 
+    @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt = OffsetDateTime.now();
 
-    // Getters and setters
+    /* getters & setters unchanged */
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

@@ -8,7 +8,8 @@ import java.time.OffsetDateTime;
     name = "notifications",
     indexes = {
         @Index(columnList = "user_id"),
-        @Index(columnList = "isRead")
+        @Index(columnList = "is_read"),
+        @Index(columnList = "created_at")
     }
 )
 public class Notification {
@@ -19,27 +20,35 @@ public class Notification {
         NEW_FOLLOWER
     }
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(
+        name = "user_id",
+        nullable = false,
+        foreignKey = @ForeignKey(name = "fk_notification_user")
+    )
     private User user;
 
-    @Column(length = 500)
+    @Column(nullable = false, length = 500)
     private String message;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 50)
+    @Column(nullable = false, length = 50)
     private NotificationType type;
 
-    private boolean isRead = false;
+    @Column(name = "is_read", nullable = false)
+    private boolean read = false;
 
+    @Column(name = "reference_id")
     private Long referenceId; // postId or userId
 
+    @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt = OffsetDateTime.now();
 
-    // Getters and setters
+    /* getters & setters unchanged */
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -52,8 +61,8 @@ public class Notification {
     public NotificationType getType() { return type; }
     public void setType(NotificationType type) { this.type = type; }
 
-    public boolean isRead() { return isRead; }
-    public void setRead(boolean read) { isRead = read; }
+    public boolean isRead() { return read; }
+    public void setRead(boolean read) { this.read = read; }
 
     public Long getReferenceId() { return referenceId; }
     public void setReferenceId(Long referenceId) { this.referenceId = referenceId; }
