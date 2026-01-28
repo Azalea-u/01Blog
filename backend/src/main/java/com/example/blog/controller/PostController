@@ -1,0 +1,48 @@
+package com.example.blog.controller;
+
+import com.example.blog.dto.PostDTO;
+import com.example.blog.dto.CreatePostDTO;
+import com.example.blog.service.PostService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/posts")
+@RequiredArgsConstructor
+public class PostController {
+
+    private final PostService postService;
+
+    @GetMapping
+    public List<PostDTO> getAllPosts() {
+        return postService.getAll();
+    }
+
+    @GetMapping("/{id}")
+    public PostDTO getPostById(@PathVariable Long id) {
+        return postService.getById(id);
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public PostDTO createPost(@RequestBody CreatePostDTO dto) {
+        return postService.create(dto);
+    }
+
+    @PutMapping("/{id}/update")
+    public PostDTO updatePost(
+            @PathVariable Long id,
+            @RequestBody CreatePostDTO dto
+    ) {
+        return postService.update(id, dto);
+    }
+
+    @DeleteMapping("/{id}/delete")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletePost(@PathVariable Long id) {
+        postService.delete(id);
+    }
+}
