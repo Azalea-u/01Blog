@@ -2,32 +2,14 @@ package com.example.blog.dto;
 
 import java.time.OffsetDateTime;
 
-public class UserDTO {
+public class UserAdminDTO {
 
     private Long id;
     private String username;
     private String email;
     private String role;
-    private boolean banned;
+    private Boolean banned;
     private OffsetDateTime createdAt;
-
-    public UserDTO() {}
-
-    public UserDTO(
-        Long id,
-        String username,
-        String email,
-        String role,
-        boolean banned,
-        OffsetDateTime createdAt
-    ) {
-        this.id = id;
-        this.username = username;
-        this.email = email;
-        this.role = role;
-        this.banned = banned;
-        this.createdAt = createdAt;
-    }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -41,8 +23,8 @@ public class UserDTO {
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
 
-    public boolean isBanned() { return banned; }
-    public void setBanned(boolean banned) { this.banned = banned; }
+    public Boolean getBanned() { return banned; }
+    public void setBanned(Boolean banned) { this.banned = banned; }
 
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }

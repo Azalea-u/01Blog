@@ -5,39 +5,46 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.OffsetDateTime;
-import java.util.Map;
-
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleNotFound(ResourceNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Map.of(
-                        "timestamp", OffsetDateTime.now(),
-                        "error", "Not Found",
-                        "message", ex.getMessage()
-                ));
+    public ResponseEntity<ApiError> handleNotFound(ResourceNotFoundException ex) {
+        ApiError error = new ApiError(
+            HttpStatus.NOT_FOUND.value(),
+            "NOT_FOUND",
+            ex.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(Map.of(
-                        "timestamp", OffsetDateTime.now(),
-                        "error", "Forbidden",
-                        "message", ex.getMessage()
-                ));
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ApiError> handleBadRequest(BadRequestException ex) {
+        ApiError error = new ApiError(
+            HttpStatus.BAD_REQUEST.value(),
+            "BAD_REQUEST",
+            ex.getMessage()
+        );
+        return ResponseEntity.badRequest().body(error);
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, Object>> handleRuntime(RuntimeException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of(
-                        "timestamp", OffsetDateTime.now(),
-                        "error", "Bad Request",
-                        "message", ex.getMessage()
-                ));
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ApiError> handleForbidden(ForbiddenException ex) {
+        ApiError error = new ApiError(
+            HttpStatus.FORBIDDEN.value(),
+            "FORBIDDEN",
+            ex.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiError> handleGeneric(Exception ex) {
+        ApiError error = new ApiError(
+            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+            "INTERNAL_ERROR",
+            "Something went wrong"
+        );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 }

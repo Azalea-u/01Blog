@@ -1,7 +1,8 @@
 package com.example.blog.controller;
 
 import com.example.blog.dto.UserDTO;
-import com.example.blog.dto.UserMapper;
+import com.example.blog.dto.UserAdminDTO;
+import com.example.blog.mapper.UserMapper;
 import com.example.blog.model.User;
 import com.example.blog.service.UserService;
 
@@ -11,7 +12,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
@@ -23,16 +23,19 @@ public class UserController {
         this.userService = userService;
     }
 
-    // Admin only
+    // ================= ADMIN =================
+
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public List<UserDTO> getAllUsers() {
-        return userService.getAllUsers().stream()
-                .map(UserMapper::toDTO)
-                .collect(Collectors.toList());
+    public List<UserAdminDTO> getAllUsers() {
+        return userService.getAllUsers()
+                .stream()
+                .map(UserMapper::toAdminDTO)
+                .toList();
     }
 
-    // Get user by ID (admin or self)
+    // ================= PUBLIC / SELF =================
+
     @PreAuthorize("#id == principal.id or hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUser(@PathVariable @NonNull Long id) {
@@ -42,22 +45,29 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Create user (public registration)
+    // ================= REGISTRATION =================
+
     @PostMapping
-    public UserDTO createUser(@RequestBody @NonNull User user) {
+    public UserDTO registerUser(@RequestBody @NonNull User user) {
+        // TEMPORARY: replace with RegisterUserDTO later
         User created = userService.createUser(user);
         return UserMapper.toDTO(created);
     }
 
-    // Update user (admin or self)
+    // ================= UPDATE =================
+
     @PreAuthorize("#id == principal.id or hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public UserDTO updateUser(@PathVariable @NonNull Long id, @RequestBody @NonNull User user) {
+    public UserDTO updateUser(
+            @PathVariable @NonNull Long id,
+            @RequestBody @NonNull User user
+    ) {
         User updated = userService.updateUser(id, user);
         return UserMapper.toDTO(updated);
     }
 
-    // Delete user (admin only)
+    // ================= DELETE =================
+
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable @NonNull Long id) {
