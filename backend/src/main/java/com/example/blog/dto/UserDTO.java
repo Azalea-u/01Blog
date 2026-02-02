@@ -1,49 +1,21 @@
 package com.example.blog.dto;
 
+import com.example.blog.model.Role;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.OffsetDateTime;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserDTO {
 
     private Long id;
     private String username;
     private String email;
-    private String role;
+    private Role role;
     private boolean banned;
     private OffsetDateTime createdAt;
-
-    public UserDTO() {}
-
-    public UserDTO(
-        Long id,
-        String username,
-        String email,
-        String role,
-        boolean banned,
-        OffsetDateTime createdAt
-    ) {
-        this.id = id;
-        this.username = username;
-        this.email = email;
-        this.role = role;
-        this.banned = banned;
-        this.createdAt = createdAt;
-    }
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
-
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
-
-    public boolean isBanned() { return banned; }
-    public void setBanned(boolean banned) { this.banned = banned; }
-
-    public OffsetDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
 }

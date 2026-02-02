@@ -3,6 +3,7 @@ package com.example.blog.controller;
 import com.example.blog.dto.PostDTO;
 import com.example.blog.dto.CreatePostDTO;
 import com.example.blog.service.PostService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -28,19 +29,19 @@ public class PostController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PostDTO createPost(@RequestBody CreatePostDTO dto) {
+    public PostDTO createPost(@Valid @RequestBody CreatePostDTO dto) {
         return postService.create(dto);
     }
 
-    @PutMapping("/{id}/update")
+    @PutMapping("/{id}")
     public PostDTO updatePost(
             @PathVariable Long id,
-            @RequestBody CreatePostDTO dto
+            @Valid @RequestBody CreatePostDTO dto
     ) {
         return postService.update(id, dto);
     }
 
-    @DeleteMapping("/{id}/delete")
+    @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletePost(@PathVariable Long id) {
         postService.delete(id);

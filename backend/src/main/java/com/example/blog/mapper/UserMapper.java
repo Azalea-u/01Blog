@@ -1,5 +1,6 @@
 package com.example.blog.mapper;
 
+import com.example.blog.dto.ProfileDTO;
 import com.example.blog.dto.UserDTO;
 import com.example.blog.dto.UserAdminDTO;
 import com.example.blog.model.User;
@@ -18,8 +19,24 @@ public final class UserMapper {
             user.getUsername(),
             user.getEmail(),
             user.getRole(),
-            user.getIsBanned(),
+            user.isBanned(),
             user.getCreatedAt()
+        );
+    }
+
+    /* ================= PUBLIC PROFILE (No Email) ================= */
+
+    public static ProfileDTO toProfileDTO(User user) {
+        if (user == null) return null;
+
+        return new ProfileDTO(
+            user.getId(),
+            user.getUsername(),
+            user.getCreatedAt(),
+            user.isBanned(),
+            user.getPosts() != null ? user.getPosts().size() : 0,
+            user.getSubscribers() != null ? user.getSubscribers().size() : 0,
+            user.getSubscriptions() != null ? user.getSubscriptions().size() : 0
         );
     }
 
@@ -28,14 +45,15 @@ public final class UserMapper {
     public static UserAdminDTO toAdminDTO(User user) {
         if (user == null) return null;
 
-        UserAdminDTO dto = new UserAdminDTO();
-        dto.setId(user.getId());
-        dto.setUsername(user.getUsername());
-        dto.setEmail(user.getEmail());
-        dto.setRole(user.getRole());
-        dto.setBanned(user.getIsBanned());
-        dto.setCreatedAt(user.getCreatedAt());
-
-        return dto;
+        return new UserAdminDTO(
+            user.getId(),
+            user.getUsername(),
+            user.getEmail(),
+            user.getRole(),
+            user.isBanned(),
+            user.getCreatedAt(),
+            user.getPosts() != null ? user.getPosts().size() : 0,
+            user.getReportsReceived() != null ? user.getReportsReceived().size() : 0
+        );
     }
 }

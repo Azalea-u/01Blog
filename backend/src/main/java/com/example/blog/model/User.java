@@ -1,9 +1,16 @@
 package com.example.blog.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+
 
 @Entity
 @Table(
@@ -13,6 +20,9 @@ import java.util.List;
         @Index(columnList = "email")
     }
 )
+@Getter
+@Setter
+@NoArgsConstructor
 public class User {
 
     @Id
@@ -26,24 +36,27 @@ public class User {
     private String email;
 
     @Column(name = "password_hash", nullable = false, length = 255)
+    @JsonIgnore  // Never expose password in JSON
     private String passwordHash;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private String role = "USER";
+    private Role role = Role.USER;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime createdAt = OffsetDateTime.now();
+    private OffsetDateTime createdAt;
 
     @Column(name = "is_banned", nullable = false)
     private boolean banned = false;
 
-    /* ---------- relations ---------- */
+    /* ---------- Relations ---------- */
 
     @OneToMany(
         mappedBy = "user",
         cascade = CascadeType.REMOVE,
         orphanRemoval = true
     )
+    @JsonIgnore
     private List<Post> posts = new ArrayList<>();
 
     @OneToMany(
@@ -51,6 +64,7 @@ public class User {
         cascade = CascadeType.REMOVE,
         orphanRemoval = true
     )
+    @JsonIgnore
     private List<Comment> comments = new ArrayList<>();
 
     @OneToMany(
@@ -58,6 +72,7 @@ public class User {
         cascade = CascadeType.REMOVE,
         orphanRemoval = true
     )
+    @JsonIgnore
     private List<Like> likes = new ArrayList<>();
 
     @OneToMany(
@@ -65,6 +80,7 @@ public class User {
         cascade = CascadeType.REMOVE,
         orphanRemoval = true
     )
+    @JsonIgnore
     private List<Notification> notifications = new ArrayList<>();
 
     @OneToMany(
@@ -72,6 +88,7 @@ public class User {
         cascade = CascadeType.REMOVE,
         orphanRemoval = true
     )
+    @JsonIgnore
     private List<Subscription> subscriptions = new ArrayList<>();
 
     @OneToMany(
@@ -79,6 +96,7 @@ public class User {
         cascade = CascadeType.REMOVE,
         orphanRemoval = true
     )
+    @JsonIgnore
     private List<Subscription> subscribers = new ArrayList<>();
 
     @OneToMany(
@@ -86,6 +104,7 @@ public class User {
         cascade = CascadeType.REMOVE,
         orphanRemoval = true
     )
+    @JsonIgnore
     private List<Report> reportsMade = new ArrayList<>();
 
     @OneToMany(
@@ -93,52 +112,14 @@ public class User {
         cascade = CascadeType.REMOVE,
         orphanRemoval = true
     )
+    @JsonIgnore
     private List<Report> reportsReceived = new ArrayList<>();
 
-    // Getters and setters
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
-
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-
-    public String getPasswordHash() { return passwordHash; }
-    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
-
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
-
-    public OffsetDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
-
-    public boolean getIsBanned() { return banned; }
-    public void setBanned(boolean banned) { this.banned = banned; }
-
-    public List<Post> getPosts() { return posts; }
-    public void setPosts(List<Post> posts) { this.posts = posts; }
-
-    public List<Comment> getComments() { return comments; }
-    public void setComments(List<Comment> comments) { this.comments = comments; }
-
-    public List<Like> getLikes() { return likes; }
-    public void setLikes(List<Like> likes) { this.likes = likes; }
-
-    public List<Notification> getNotifications() { return notifications; }
-    public void setNotifications(List<Notification> notifications) { this.notifications = notifications; }
-
-    public List<Subscription> getSubscriptions() { return subscriptions; }
-    public void setSubscriptions(List<Subscription> subscriptions) { this.subscriptions = subscriptions; }
-
-    public List<Subscription> getSubscribers() { return subscribers; }
-    public void setSubscribers(List<Subscription> subscribers) { this.subscribers = subscribers; }
-
-    public List<Report> getReportsMade() { return reportsMade; }
-    public void setReportsMade(List<Report> reportsMade) { this.reportsMade = reportsMade; }
-
-    public List<Report> getReportsReceived() { return reportsReceived; }
-    public void setReportsReceived(List<Report> reportsReceived) { this.reportsReceived = reportsReceived; }
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = OffsetDateTime.now();
+        }
+    }
 }
+
