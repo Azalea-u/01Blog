@@ -1,6 +1,11 @@
 package com.example.blog.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +18,9 @@ import java.util.List;
         @Index(columnList = "created_at")
     }
 )
+@Getter
+@Setter
+@NoArgsConstructor
 public class Post {
 
     public enum MediaType {
@@ -23,7 +31,7 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(
         name = "user_id",
         nullable = false,
@@ -41,19 +49,21 @@ public class Post {
     private String mediaUrl;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 20)
     private MediaType mediaType;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime createdAt = OffsetDateTime.now();
+    private OffsetDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
-    private OffsetDateTime updatedAt = OffsetDateTime.now();
+    private OffsetDateTime updatedAt;
 
     @OneToMany(
         mappedBy = "post",
         cascade = CascadeType.REMOVE,
         orphanRemoval = true
     )
+    @JsonIgnore
     private List<Comment> comments = new ArrayList<>();
 
     @OneToMany(
@@ -61,38 +71,21 @@ public class Post {
         cascade = CascadeType.REMOVE,
         orphanRemoval = true
     )
+    @JsonIgnore
     private List<Like> likes = new ArrayList<>();
 
-    /* getters & setters unchanged */
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = OffsetDateTime.now();
+        }
+        if (updatedAt == null) {
+            updatedAt = OffsetDateTime.now();
+        }
+    }
 
-    // Getters and setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
-
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-
-    public String getContent() { return content; }
-    public void setContent(String content) { this.content = content; }
-
-    public String getMediaUrl() { return mediaUrl; }
-    public void setMediaUrl(String mediaUrl) { this.mediaUrl = mediaUrl; }
-
-    public MediaType getMediaType() { return mediaType; }
-    public void setMediaType(MediaType mediaType) { this.mediaType = mediaType; }
-
-    public OffsetDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
-
-    public OffsetDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(OffsetDateTime updatedAt) { this.updatedAt = updatedAt; }
-
-    public List<Comment> getComments() { return comments; }
-    public void setComments(List<Comment> comments) { this.comments = comments; }
-
-    public List<Like> getLikes() { return likes; }
-    public void setLikes(List<Like> likes) { this.likes = likes; }
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = OffsetDateTime.now();
+    }
 }
