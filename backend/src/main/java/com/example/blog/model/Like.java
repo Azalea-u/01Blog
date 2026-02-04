@@ -1,8 +1,13 @@
 package com.example.blog.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import java.time.OffsetDateTime;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.io.Serializable;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 
 @Entity
@@ -17,40 +22,42 @@ import java.util.Objects;
     }
 )
 @IdClass(Like.LikeId.class)
+@Getter
+@Setter
+@NoArgsConstructor
 public class Like {
 
     @Id
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(
         name = "user_id",
         nullable = false,
         foreignKey = @ForeignKey(name = "fk_like_user")
     )
+    @JsonIgnore
     private User user;
 
     @Id
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(
         name = "post_id",
         nullable = false,
         foreignKey = @ForeignKey(name = "fk_like_post")
     )
+    @JsonIgnore
     private Post post;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime createdAt = OffsetDateTime.now();
+    private OffsetDateTime createdAt;
 
-    /* getters & setters unchanged */
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = OffsetDateTime.now();
+        }
+    }
 
-    public Post getPost() { return post; }
-    public void setPost(Post post) { this.post = post; }
-
-    public OffsetDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
-
-    /* ---------- composite key ---------- */
+    /* ---------- Composite Key ---------- */
     public static class LikeId implements Serializable {
 
         private Long user;
