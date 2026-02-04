@@ -7,7 +7,28 @@ import java.util.List;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
-    List<Notification> findByUserIdAndIsReadFalse(Long userId);
+    /**
+     * Find all notifications for a user, ordered by creation date (newest first)
+     */
+    List<Notification> findByUserIdOrderByCreatedAtDesc(Long userId);
 
-    long countByUserIdAndIsReadFalse(Long userId);
+    /**
+     * Find unread notifications for a user, ordered by creation date (newest first)
+     */
+    List<Notification> findByUserIdAndReadFalseOrderByCreatedAtDesc(Long userId);
+
+    /**
+     * Find unread notifications for a user (no ordering - for batch updates)
+     */
+    List<Notification> findByUserIdAndReadFalse(Long userId);
+
+    /**
+     * Count unread notifications for a user
+     */
+    long countByUserIdAndReadFalse(Long userId);
+
+    /**
+     * Delete all notifications for a user
+     */
+    void deleteByUserId(Long userId);
 }
