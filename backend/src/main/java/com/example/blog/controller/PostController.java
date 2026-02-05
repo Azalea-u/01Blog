@@ -7,10 +7,12 @@ import com.example.blog.service.PostService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -27,13 +29,21 @@ public class PostController {
     /* ================= CREATE ================= */
 
     /**
-     * Create a new post
+     * Create a new post with optional media upload
      * POST /api/posts
      */
     @PreAuthorize("isAuthenticated()")
-    @PostMapping
-    public ResponseEntity<PostDTO> createPost(@RequestBody @Valid CreatePostRequest request) {
-        PostDTO created = postService.createPost(request);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<PostDTO> createPost(
+            @RequestPart("title") String title,
+            @RequestPart("content") String content,
+            @RequestPart(value = "media", required = false) MultipartFile media
+    ) {
+        CreatePostRequest request = new CreatePostRequest();
+        request.setTitle(title);
+        request.setContent(content);
+        
+        PostDTO created = postService.createPost(request, media);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
@@ -101,12 +111,18 @@ public class PostController {
      * PUT /api/posts/{id}
      */
     @PreAuthorize("isAuthenticated()")
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<PostDTO> updatePost(
             @PathVariable @NonNull Long id,
-            @RequestBody @Valid UpdatePostRequest request
+            @RequestPart("title") String title,
+            @RequestPart("content") String content,
+            @RequestPart(value = "media", required = false) MultipartFile media
     ) {
-        PostDTO updated = postService.updatePost(id, request);
+        UpdatePostRequest request = new UpdatePostRequest();
+        request.setTitle(title);
+        request.setContent(content);
+        
+        PostDTO updated = postService.updatePost(id, request, media);
         return ResponseEntity.ok(updated);
     }
 

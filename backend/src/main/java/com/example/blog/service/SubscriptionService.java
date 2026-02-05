@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -133,10 +134,13 @@ public class SubscriptionService {
     }
 
     /**
-     * Get subscriber IDs for notifications
+     * Get list of subscriber user IDs for a target user
      */
     @Transactional(readOnly = true)
-    public List<Long> getSubscriberIds(@NonNull Long userId) {
-        return subscriptionRepository.findSubscriberIdsByTargetId(userId);
+    public List<Long> getSubscriberIds(@NonNull Long targetUserId) {
+        return subscriptionRepository.findByTargetId(targetUserId)
+                .stream()
+                .map(sub -> sub.getSubscriber().getId())
+                .collect(Collectors.toList());
     }
 }

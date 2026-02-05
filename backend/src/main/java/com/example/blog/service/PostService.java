@@ -6,6 +6,7 @@ import com.example.blog.dto.UpdatePostRequest;
 import com.example.blog.exception.ForbiddenException;
 import com.example.blog.exception.ResourceNotFoundException;
 import com.example.blog.mapper.PostMapper;
+import com.example.blog.model.Notification;
 import com.example.blog.model.Post;
 import com.example.blog.model.User;
 import com.example.blog.repository.PostRepository;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,11 +30,24 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserService userService;
     private final UserSecurity userSecurity;
+    private final FileStorageService fileStorageService;
+    private final NotificationService notificationService;
+    private final SubscriptionService subscriptionService;
 
-    public PostService(PostRepository postRepository, UserService userService, UserSecurity userSecurity) {
+    public PostService(
+            PostRepository postRepository, 
+            UserService userService, 
+            UserSecurity userSecurity,
+            FileStorageService fileStorageService,
+            NotificationService notificationService,
+            SubscriptionService subscriptionService
+    ) {
         this.postRepository = postRepository;
         this.userService = userService;
         this.userSecurity = userSecurity;
+        this.fileStorageService = fileStorageService;
+        this.notificationService = notificationService;
+        this.subscriptionService = subscriptionService;
     }
 
     /* ================= CREATE ================= */
@@ -40,7 +55,7 @@ public class PostService {
     /**
      * Create a new post for the current authenticated user
      */
-    public PostDTO createPost(@NonNull CreatePostRequest request) {
+    public PostDTO createPost(@NonNull CreatePostRequest request, MultipartFile media) {
         // Get current user
         Long currentUserId = userSecurity.getCurrentUserId();
         if (currentUserId == null) {
@@ -50,9 +65,36 @@ public class PostService {
         User user = userService.getUserById(currentUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
+        // Handle media upload
+        if (media != null && !media.isEmpty()) {
+            String mediaUrl = fileStorageService.storeFile(media);
+            request.setMediaUrl(mediaUrl);
+            
+            // Determine media type from content type
+            String contentType = media.getContentType();
+            if (contentType != null) {
+                if (contentType.startsWith("image/")) {
+                    request.setMediaType(Post.MediaType.IMAGE);
+                } else if (contentType.startsWith("video/")) {
+                    request.setMediaType(Post.MediaType.VIDEO);
+                }
+            }
+        }
+
         // Create post
         Post post = PostMapper.fromCreateRequest(request, user);
         Post savedPost = postRepository.save(post);
+
+        // Notify subscribers (REQUIRED BY SUBJECT)
+        List<Long> subscriberIds = subscriptionService.getSubscriberIds(currentUserId);
+        if (!subscriberIds.isEmpty()) {
+            notificationService.createNotificationsForUsers(
+                subscriberIds,
+                user.getUsername() + " published a new post: " + savedPost.getTitle(),
+                Notification.NotificationType.NEW_POST,
+                savedPost.getId()
+            );
+        }
 
         return PostMapper.toDTO(savedPost, currentUserId);
     }
@@ -138,13 +180,33 @@ public class PostService {
     /**
      * Update a post (only owner or admin)
      */
-    public PostDTO updatePost(@NonNull Long id, @NonNull UpdatePostRequest request) {
+    public PostDTO updatePost(@NonNull Long id, @NonNull UpdatePostRequest request, MultipartFile media) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post with ID " + id + " not found"));
 
         // Check ownership
         if (!userSecurity.isOwnerOrAdmin(post.getUser().getId())) {
             throw new ForbiddenException("You don't have permission to update this post");
+        }
+
+        // Handle media upload
+        if (media != null && !media.isEmpty()) {
+            // Delete old media if exists
+            if (post.getMediaUrl() != null) {
+                fileStorageService.deleteFile(post.getMediaUrl());
+            }
+            
+            String mediaUrl = fileStorageService.storeFile(media);
+            request.setMediaUrl(mediaUrl);
+            
+            String contentType = media.getContentType();
+            if (contentType != null) {
+                if (contentType.startsWith("image/")) {
+                    request.setMediaType(Post.MediaType.IMAGE);
+                } else if (contentType.startsWith("video/")) {
+                    request.setMediaType(Post.MediaType.VIDEO);
+                }
+            }
         }
 
         // Update post
@@ -167,6 +229,11 @@ public class PostService {
         // Check ownership
         if (!userSecurity.isOwnerOrAdmin(post.getUser().getId())) {
             throw new ForbiddenException("You don't have permission to delete this post");
+        }
+
+        // Delete media file if exists
+        if (post.getMediaUrl() != null) {
+            fileStorageService.deleteFile(post.getMediaUrl());
         }
 
         postRepository.delete(post);

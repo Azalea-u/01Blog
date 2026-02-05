@@ -5,8 +5,9 @@ import com.example.blog.mapper.UserMapper;
 import com.example.blog.model.Role;
 import com.example.blog.model.User;
 import com.example.blog.service.UserService;
+import com.example.blog.security.UserSecurity;
+import com.example.blog.exception.ResourceNotFoundException;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,9 +20,11 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final UserSecurity userSecurity;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, UserSecurity userSecurity) {
         this.userService = userService;
+        this.userSecurity = userSecurity;
     }
 
     /* ================= ADMIN ENDPOINTS ================= */
@@ -95,9 +98,11 @@ public class UserController {
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/me")
     public ResponseEntity<UserDTO> getCurrentUser() {
-        // This will be implemented in AuthController using SecurityContext
-        // For now, return 501 Not Implemented
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        Long userId = userSecurity.getCurrentUserId();
+        return userService.getUserById(userId)
+            .map(UserMapper::toDTO)
+            .map(ResponseEntity::ok)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 
     /**
@@ -106,12 +111,14 @@ public class UserController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<?> getUser(@PathVariable @NonNull Long id) {
+        Long currentUserId = userSecurity.getCurrentUserId();
         return userService.getUserById(id)
                 .map(user -> {
-                    // If owner or admin, return full UserDTO
-                    // Otherwise return ProfileDTO
-                    // For now, return ProfileDTO for everyone
-                    return ResponseEntity.ok(UserMapper.toProfileDTO(user));
+                    if (user.getId().equals(currentUserId) || userSecurity.isAdmin()) {
+                        return ResponseEntity.ok(UserMapper.toDTO(user));
+                    } else {
+                        return ResponseEntity.ok(UserMapper.toProfileDTO(user));
+                    }
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
