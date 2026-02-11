@@ -83,8 +83,7 @@ public class SecurityConfig {
         return authenticationManagerBuilder.build();
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
             "http://localhost:4200",  // Angular default port

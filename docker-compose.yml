@@ -31,12 +31,5 @@ services:
     depends_on:
       - db
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: blog_frontend
-    ports:
-      - "4200:4200"
 volumes:
   db_data:
