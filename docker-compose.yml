@@ -6,6 +6,8 @@ services:
       POSTGRES_DB: blogdb
       POSTGRES_USER: bloguser
       POSTGRES_PASSWORD: blogpass
+    ports:
+      - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
 
@@ -22,11 +24,19 @@ services:
       SPRING_DATASOURCE_PASSWORD: blogpass
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_PROFILES_ACTIVE: dev
+    
     volumes:
       - ./backend/src:/app/src
       - ./backend/pom.xml:/app/pom.xml
     depends_on:
       - db
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: blog_frontend
+    ports:
+      - "4200:4200"
 volumes:
   db_data:
