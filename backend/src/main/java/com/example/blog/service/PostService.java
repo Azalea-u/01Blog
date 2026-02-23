@@ -85,6 +85,7 @@ public class PostService {
         Post post = PostMapper.fromCreateRequest(request, user);
         Post savedPost = postRepository.save(post);
 
+
         // Notify subscribers (REQUIRED BY SUBJECT)
         List<Long> subscriberIds = subscriptionService.getSubscriberIds(currentUserId);
         if (!subscriberIds.isEmpty()) {

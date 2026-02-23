@@ -3,6 +3,7 @@ package com.example.blog.service;
 import com.example.blog.exception.BadRequestException;
 import com.example.blog.exception.ForbiddenException;
 import com.example.blog.exception.ResourceNotFoundException;
+import com.example.blog.model.Notification;
 import com.example.blog.model.Subscription;
 import com.example.blog.model.User;
 import com.example.blog.repository.SubscriptionRepository;
@@ -21,15 +22,18 @@ public class SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private final UserService userService;
     private final UserSecurity userSecurity;
+    private final NotificationService notificationService;
 
     public SubscriptionService(
             SubscriptionRepository subscriptionRepository,
             UserService userService,
-            UserSecurity userSecurity
+            UserSecurity userSecurity,
+            NotificationService notificationService
     ) {
         this.subscriptionRepository = subscriptionRepository;
         this.userService = userService;
         this.userSecurity = userSecurity;
+        this.notificationService = notificationService;
     }
 
     /**
@@ -63,6 +67,14 @@ public class SubscriptionService {
         subscription.setSubscriber(currentUser);
         subscription.setTarget(targetUser);
         subscriptionRepository.save(subscription);
+
+        // Notify the target user that they have a new follower
+        notificationService.createNotification(
+            targetUserId,
+            currentUser.getUsername() + " started following you",
+            Notification.NotificationType.NEW_FOLLOWER,
+            currentUserId
+        );
     }
 
     /**
@@ -79,7 +91,6 @@ public class SubscriptionService {
             throw new BadRequestException("You are not subscribed to this user");
         }
 
-        // Delete subscription
         subscriptionRepository.deleteBySubscriberIdAndTargetId(currentUserId, targetUserId);
     }
 
@@ -89,9 +100,7 @@ public class SubscriptionService {
     @Transactional(readOnly = true)
     public boolean isSubscribed(@NonNull Long targetUserId) {
         Long currentUserId = userSecurity.getCurrentUserId();
-        if (currentUserId == null) {
-            return false;
-        }
+        if (currentUserId == null) return false;
         return subscriptionRepository.existsBySubscriberIdAndTargetId(currentUserId, targetUserId);
     }
 
@@ -101,9 +110,7 @@ public class SubscriptionService {
     @Transactional(readOnly = true)
     public List<User> getSubscriptions(@NonNull Long userId) {
         return subscriptionRepository.findBySubscriberId(userId)
-                .stream()
-                .map(Subscription::getTarget)
-                .toList();
+                .stream().map(Subscription::getTarget).toList();
     }
 
     /**
@@ -112,9 +119,7 @@ public class SubscriptionService {
     @Transactional(readOnly = true)
     public List<User> getSubscribers(@NonNull Long userId) {
         return subscriptionRepository.findByTargetId(userId)
-                .stream()
-                .map(Subscription::getSubscriber)
-                .toList();
+                .stream().map(Subscription::getSubscriber).toList();
     }
 
     /**

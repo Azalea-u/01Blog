@@ -23,7 +23,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity  // Enables @PreAuthorize annotations
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
@@ -37,32 +37,18 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // Disable CSRF for stateless API
             .csrf(csrf -> csrf.disable())
-
-            // Enable CORS
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-            // Stateless session management
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
-
-            // Authorization rules
             .authorizeHttpRequests(auth -> auth
-                // Public endpoints
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/health/**").permitAll()
-                
-                // Public user profiles (no auth required to view)
                 .requestMatchers("/api/users/profile/**").permitAll()
-                
-                // All other endpoints require authentication
-                // Fine-grained access control is handled by @PreAuthorize
+                .requestMatchers("/uploads/**").permitAll()
                 .anyRequest().authenticated()
             )
-
-            // Add JWT filter before UsernamePasswordAuthenticationFilter
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -75,7 +61,7 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http, PasswordEncoder passwordEncoder) throws Exception {
-        AuthenticationManagerBuilder authenticationManagerBuilder = 
+        AuthenticationManagerBuilder authenticationManagerBuilder =
             http.getSharedObject(AuthenticationManagerBuilder.class);
         authenticationManagerBuilder
             .userDetailsService(userDetailsService)
@@ -86,13 +72,13 @@ public class SecurityConfig {
     UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
-            "http://localhost:4200",  // Angular default port
-            "http://localhost:3000"   // Alternative port
+            "http://localhost:4200",
+            "http://localhost:3000"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
